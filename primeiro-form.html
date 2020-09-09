@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Documento Modelo</title>
+   <style>
+      label {
+         display: block;
+      }
+      div {
+         margin: 20px 0;
+      }
+      /* Todos os label que têm a propriedade for ficarão na mesma linha
+         que outros elementos inline */
+      label[for] {
+         display: inline;
+      }
+      fieldset {
+         width: 25%;
+      }
+      
+   </style>
+</head>
+<body>
+   <h1>Formulário de saudação</h1>
+   
+   <div>
+      <label>Primeiro nome</label>
+      <input id="primeiro-nome" type="text" placeholder="Informe seu primeiro nome">
+   </div>
+
+   <div>
+      <label>Sobrenome</label>
+      <input id="sobrenome" placeholder="Informe seu sobrenome">
+   </div>
+
+   <div>
+      <label>Forma de tratamento</label>
+      <select id="forma-tratamento">
+         <option>(Selecione)</option>
+         <option>Sua Majestade</option>
+         <option>Excelentíssimo/a</option>
+         <option>Ilustríssimo/a</option>
+         <option>Vossa Senhoria</option>
+         <option>Senhor/a</option>
+      </select>
+   </div>
+
+   <fieldset>
+      <legend>Sexo</legend>
+      <!-- Para que os botões de rádio sejam mutuamente exclusivos, 
+         é necessário agrupá-los dando a eles o mesmo valor no
+         atributo name.
+      -->
+      <div>
+         <input type="radio" id="masculino" name="sexo" checked><label for="masculino">Masculino</label>
+      </div>
+      
+      <div>
+         <input type="radio" id="feminino" name="sexo"><label for="feminino">Feminino</label>
+      </div>
+
+   </fieldset>
+
+   <div>
+      <label>Hora do dia</label>
+      <input type="number" id="hora-dia" min="0" max="23" value="0">
+   </div>
+
+   <fieldset>
+      <legend>Exibição da saudação</legend>
+      
+      <div>
+         <input type="checkbox" id="exibir-alert">
+         <label for="exibir-alert">Exibir com alert()</label>
+      </div>
+      
+      <div>
+         <input type="checkbox" id="exibir-doc" checked>
+         <label for="exibir-doc">Exibir no documento</label>
+      </div>
+
+   </fieldset>
+
+   <div id="saudacao"></div>
+
+   <div>
+      <button id="saudar">Saudar</button>
+   </div>
+   
+   <script>
+      // Liga o modo "chato" do JS
+      // Não deixa usar variáveis sem let ou var
+      'use strict'
+
+      // Capturando elementos com getElementById()
+      const primeiroNome = document.getElementById('primeiro-nome')
+      const sobrenome = document.getElementById('sobrenome')
+      const formaTratamento = document.getElementById('forma-tratamento')
+      const masculino = document.getElementById('masculino')
+      const feminino = document.getElementById('feminino')
+
+      // Capturando elementos com querySelector()
+      const horaDia = document.querySelector('#hora-dia')
+      const exibirAlert = document.querySelector('#exibir-alert')
+      const exibirDoc = document.querySelector('#exibir-doc')
+      const saudacao = document.querySelector('#saudacao')
+      const saudar = document.querySelector('#saudar')
+
+      /**********************************************************
+         VALIDAÇÃO DO FORMULÁRIO
+      **********************************************************/
+      function botaoClique() {
+      
+         let valido = true
+
+         let valHoraDia = parseInt(horaDia.value)
+
+         // trim(): corta espaços em branco sobrando do início
+         // e do final de uma string
+         if(primeiroNome.value.trim() == '') {
+            alert('O primeiro nome deve ser preenchido.')
+            primeiroNome.focus() // Coloca o cursor no elemento especificado
+            valido = false
+         }
+         
+         else if(sobrenome.value.trim() == '') {
+            alert('O sobrenome deve ser preenchido.')
+            sobrenome.focus() // Coloca o cursor no elemento especificado
+            valido = false
+         }
+
+         else if(formaTratamento.selectedIndex <= 0) {
+            alert('Selecione uma forma de tratamento válida.')
+            formaTratamento.focus()
+            valido = false
+         }
+
+         else if(!(masculino.checked || feminino.checked)) {
+            alert('Selecione um sexo.')
+            masculino.focus()
+            valido = false
+         }
+
+         
+         else if(isNaN(valHoraDia) || valHoraDia < 0 || valHoraDia > 23) {
+            alert('A hora do dia deve estar entre 0 e 23.')
+            valHoraDia.focus()
+            valido = false
+         }
+
+         // Uma das opções de exibição da mensagem deve estar selecionada,
+         // pelo menos
+         else if(!(exibirAlert.checked || exibirDoc.checked)) {
+            alert('Selecione pelo menos uma opção de saída para a mensagem.')
+            exibirAlert.focus()
+            valido = false
+         }
+
+         // Os dados do formulário são válidos, vamos montar e exibir a mensagem
+         // de saudação
+         if(valido) {
+            let mensagem
+            
+            if(valHoraDia >= 0 && valHoraDia <= 11) {
+               mensagem = 'Bom dia, '
+            }
+            else if(valHoraDia >= 12 && valHoraDia <= 18) {
+               mensagem = 'Boa tarde, '
+            }
+            else {
+               mensagem = 'Boa noite, '
+            }
+
+            switch(formaTratamento.selectedIndex) {
+               case 1: // Sua Majestade
+                  mensagem += 'Sua Majestade ' // mensagem = mensagem + 'Sua ...'
+                  break;
+               
+               case 2: // Excelentíssimo/a
+                  if(masculino.checked) mensagem += 'Excelentíssimo '
+                  else mensagem += 'Excelentíssima '
+                  break;
+
+               case 3: // Ilustríssimo/a
+                  // Usando if curto
+                  mensagem += feminino.checked ? 'Ilustríssima ' : 'Ilustríssimo '
+                  break;
+
+               case 4: // Vossa Senhoria
+                  mensagem += 'Vossa Senhoria '
+                  break
+               
+               case 5: // Senhor/a
+                  //if(masculino.checked) mensagem += 'Senhor '
+                  //else mensagem += 'Senhora '
+                  
+                  // Usando o operador ternário ("if curto")
+                  mensagem += masculino.checked ? 'Senhor ' : 'Senhora '
+                  break;
+            }
+
+            mensagem += primeiroNome.value + ' ' + sobrenome.value
+            mensagem += '! Como posso ser útil?'
+
+            if(exibirAlert.checked) {
+               alert(mensagem)
+            }
+            if(exibirDoc.checked) {
+               // Exibe na div #saudacao
+               saudacao.innerText = mensagem
+            }
+
+         }
+         
+
+      }
+
+      // Forma RECOMENDADA de associar uma função a um evento de elemento
+      saudar.addEventListener('click', botaoClique)
+      // saudar.addEventListener('mouseover', botaoClique)
+
+   </script>   
+</body>
+</html>
