@@ -93,8 +93,8 @@ function botaoClique() {
 
     // se não faltar dado o programa continua 
     if (podeseguir) {
-       
-        // nome2.innerHTML = nome.value
+        // COLOCA O NOME DA VARIÁVEL NA TABELA
+        nome2.innerHTML = nome.value
         // Contando as ocorrências de cada item no vetor 
 
         for (let i = 0; i < vetor_final.length; i++) {
@@ -173,9 +173,7 @@ function botaoClique() {
                             let string = `${vetor_final2[0]['nome']} |-------${ajuda}`
                             let continua = {
                                 nome: string,
-                                valor: contador,
-                                'limete_inferior': ajuda_antiga,
-                                'limite_superior': ajuda
+                                valor: contador
                             }
                             aux2++
                             vetor_continuo.push(continua)
@@ -185,9 +183,7 @@ function botaoClique() {
                             let string = `${ajuda_antiga}|--------- ${ajuda}`
                             let continua = {
                                 nome: string,
-                                valor: contador,
-                                'limete_inferior': ajuda_antiga,
-                                'limite_superior': ajuda
+                                valor: contador
                             }
                             aux2++
                             vetor_continuo.push(continua)
@@ -204,9 +200,7 @@ function botaoClique() {
                             let string = `${ajuda_antiga}|--------- ${ajuda}`
                             let continua = {
                                 nome: string,
-                                valor: contador,
-                                'limete_inferior': ajuda_antiga,
-                                'limite_superior': ajuda
+                                valor: contador
                             }
                             vetor_continuo.push(continua)
                             vetor_final2.splice(0, w)
@@ -217,7 +211,6 @@ function botaoClique() {
 
             }
             vetor_final2 = vetor_continuo
-            console.log(vetor_final2)
         }
         //calculando as frequencias chamando uma função a parte 
         for (let i = 0; i < vetor_final2.length; i++) {
@@ -243,37 +236,6 @@ function botaoClique() {
 
 
         }
-        
-        // cria o cabeçalho da tabela
-        let linha_nomes = document.createElement('tr')
-        tabela.appendChild(linha_nomes)
-        //Nome da Variável
-        let Nome_da_Variavel = document.createElement('td')
-        Nome_da_Variavel.id = 'Nome_da_Variavel'
-        Nome_da_Variavel.innerText = nome.value
-        linha_nomes.appendChild(Nome_da_Variavel)
-        //Frequência Simples (fi)
-        let Frequencia_Simples = document.createElement('td')
-        Frequencia_Simples.id = 'Frequencia_Simples'
-        Frequencia_Simples.innerText = "Frequência Simples (fi)"
-        linha_nomes.appendChild(Frequencia_Simples)
-        //Frequencia Relativa(Fr%)
-        let Frequencia_Relativa = document.createElement('td')
-        Frequencia_Relativa.id = 'Frequencia_Relativa'
-        Frequencia_Relativa.innerText = "Frequencia Relativa(Fr%)"
-        linha_nomes.appendChild(Frequencia_Relativa)
-        //Frequencia Acumulativa
-        let Frequencia_Acumulativa = document.createElement('td')
-        Frequencia_Acumulativa.id = 'Frequencia_Acumulativa'
-        Frequencia_Acumulativa.innerText = "Frequencia Acumulativa"
-        linha_nomes.appendChild(Frequencia_Acumulativa)
-        //Frequencia Relativa Acumulativa(%)
-         let Frequencia_Relativa_Acumulativa = document.createElement('td')
-         Frequencia_Relativa_Acumulativa.id = 'Frequencia_Relativa_Acumulativa'
-         Frequencia_Relativa_Acumulativa.innerText = "Frequencia Relativa Acumulativa(%)"
-         linha_nomes.appendChild(Frequencia_Relativa_Acumulativa)
-
-
 
         for (let i = 0; i < vetor_final2.length; i++) {
             //CRIAR LINHA NA TABELA
@@ -318,11 +280,7 @@ function botaoClique() {
         cel7.id = 'total'
         cel7.innerText = total
         linha.appendChild(cel7)
-
-        grafico(vetor_final2, tipo_variavel.selectedIndex,nome.value)
     }
-    
-   
 }
 
 
@@ -340,7 +298,7 @@ function frequencias(i) {
     let aux = (i - 1)
     if (aux < 0) {
         let a = (vetor_final2[i].valor / total) * 100
-        vetor_final2[i]['Frequencia relativa'] = a 
+        vetor_final2[i]['Frequencia relativa'] = a
         let b = vetor_final2[i].valor
         vetor_final2[i]['Frequencia acumulada'] = b
         let c = vetor_final2[i]['Frequencia relativa']
@@ -355,74 +313,3 @@ function frequencias(i) {
     }
 }
 
-function grafico (vetor_final2, tipo_variavel,titulo){
-    let nome_dado = []
-    let valor_dado = []
-    let valor_porcentagem = []
-    let cores_aleatorias = []
-    let cores_aleatorias2 = []
-    for(let i = 0; i < vetor_final2.length; i++){
-        nome_dado.push(vetor_final2[i]['nome'])
-        valor_dado.push(vetor_final2[i]['valor'])
-        valor_porcentagem.push(vetor_final2[i]['Frequencia relativa'])
-        let  r = Math.floor(Math.random()*255)
-        let  g = Math.floor(Math.random()*255)
-        let  b = Math.floor(Math.random()*255)
-        let cor = `rgba(${r},${g},${b},0.25)`
-        let cor2 = `rgba(${r},${g},${b},1)`
-        cores_aleatorias.push(cor)
-        cores_aleatorias2.push(cor2) 
-        console.log(nome_dado)
-
-    var ctx = document.getElementById('myChart');
-if(tipo_variavel == 1 || tipo_variavel == 2){
-    
-    
-    var myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: nome_dado,
-            datasets: [{
-                label:valor_dado,
-                data: valor_porcentagem,
-                backgroundColor: cores_aleatorias,
-                borderColor:cores_aleatorias2,
-            }]
-        },
-        options: {
-            title: {
-                display: true,
-                text: titulo
-            }
-        }
-    });
-}
-else if(tipo_variavel == 3){
-    
-var ctx = document.getElementById('myChart');
-        var myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: nome_dado,
-                datasets: [{
-                    label:titulo ,
-                    data: valor_porcentagem,
-                    backgroundColor: cores_aleatorias,
-                    borderColor:cores_aleatorias2,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        }
-                    }]
-                }
-            }
-        });
-
-}
-}
-}
