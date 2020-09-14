@@ -62,7 +62,7 @@ function botaoClique() {
     let ordem_dados = ordem.value
     let vetor_organizador = ordem_dados.split(tira_espaco) // Tira os espaços entre os ";"         
     let vetor_ordem = vetor_organizador.filter(x => x.trim()) // Remove itens vazios do vetor
-    let vetor_aux = []
+
 
     if (nome.value.trim() == '') {
         alert('O nome da variavel deve ser preenchido.')
@@ -89,11 +89,33 @@ function botaoClique() {
         alert("selecione o tipo de variavel correta ou apague a ordem")
         tipo_variavel.focus()
         podeseguir = false
+    } else if (tipo_variavel.selectedIndex == 2) {
+        for (dado of vetor_final) {
+            let tem = vetor_ordem.indexOf(dado)
+            if (tem < 0) {
+                alert("Item da ordem não existente " + dado)
+                ordem.focus()
+                podeseguir = false
+                break
+            }
+        }
+        for (falto of vetor_ordem) {
+            let tems = vetor_final.indexOf(falto)
+
+            if (tems < 0) {
+                alert("Item dos dado não existente na ordem desejada o item é " + falto)
+                ordem.focus()
+                podeseguir = false
+                break
+            }
+
+        }
+
     }
 
     // se não faltar dado o programa continua 
     if (podeseguir) {
-       
+
         // nome2.innerHTML = nome.value
         // Contando as ocorrências de cada item no vetor 
 
@@ -119,6 +141,30 @@ function botaoClique() {
             }
         }
 
+
+
+
+        if (tipo_variavel.selectedIndex == 2) {
+            let vetor_aux = []
+
+            function buscaSequencial(lista, valorBusca, fnComp) {
+                for (let i = 0; i < lista.length; i++) {
+                    //Encontrou o que está buscando: retorna a posição
+                    //em que foi encontrado
+                    if (fnComp(lista[i], valorBusca)) return i
+                }
+                return -1 // valorBusca não foi encontrado em lista
+            }
+            for (dado of vetor_ordem) {
+                let a = buscaSequencial(vetor_final2, dado, (obj, valor) => obj['nome'] === valor)
+                let help = vetor_final2[a]
+                vetor_aux.push(help)
+                vetor_final2.splice(a, 1)
+            }
+            vetor_final2 = vetor_aux
+
+
+        }
         // Quando é o caso de quantitativo continuo
         if (tipo_variavel.selectedIndex == 4) {
             //primeiro número da sequencia
@@ -217,33 +263,13 @@ function botaoClique() {
 
             }
             vetor_final2 = vetor_continuo
-            console.log(vetor_final2)
+           
         }
         //calculando as frequencias chamando uma função a parte 
         for (let i = 0; i < vetor_final2.length; i++) {
             frequencias(i)
         }
 
-        if (tipo_variavel.selectedIndex == 2) {
-            function buscaSequencial(lista, valorBusca, fnComp) {
-                for (let i = 0; i < lista.length; i++) {
-                    //Encontrou o que está buscando: retorna a posição
-                    //em que foi encontrado
-                    if (fnComp(lista[i], valorBusca)) return i
-                }
-                return -1 // valorBusca não foi encontrado em lista
-            }
-            for (dado of vetor_ordem) {
-                let a = buscaSequencial(vetor_final2, dado, (obj, valor) => obj['nome'] === valor)
-                let help = vetor_final2[a]
-                vetor_aux.push(help)
-                vetor_final2.splice(a, 1)
-            }
-            vetor_final2 = vetor_aux
-
-
-        }
-        
         // cria o cabeçalho da tabela
         let linha_nomes = document.createElement('tr')
         tabela.appendChild(linha_nomes)
@@ -268,10 +294,10 @@ function botaoClique() {
         Frequencia_Acumulativa.innerText = "Frequencia Acumulativa"
         linha_nomes.appendChild(Frequencia_Acumulativa)
         //Frequencia Relativa Acumulativa(%)
-         let Frequencia_Relativa_Acumulativa = document.createElement('td')
-         Frequencia_Relativa_Acumulativa.id = 'Frequencia_Relativa_Acumulativa'
-         Frequencia_Relativa_Acumulativa.innerText = "Frequencia Relativa Acumulativa(%)"
-         linha_nomes.appendChild(Frequencia_Relativa_Acumulativa)
+        let Frequencia_Relativa_Acumulativa = document.createElement('td')
+        Frequencia_Relativa_Acumulativa.id = 'Frequencia_Relativa_Acumulativa'
+        Frequencia_Relativa_Acumulativa.innerText = "Frequencia Relativa Acumulativa(%)"
+        linha_nomes.appendChild(Frequencia_Relativa_Acumulativa)
 
 
 
@@ -319,10 +345,11 @@ function botaoClique() {
         cel7.innerText = total
         linha.appendChild(cel7)
 
-        grafico(vetor_final2, tipo_variavel.selectedIndex,nome.value)
+        grafico(vetor_final2, tipo_variavel.selectedIndex, nome.value)
+        media(vetor_final2, tipo_variavel.selectedIndex, total)
     }
-    
-   
+
+
 }
 
 
@@ -340,11 +367,12 @@ function frequencias(i) {
     let aux = (i - 1)
     if (aux < 0) {
         let a = (vetor_final2[i].valor / total) * 100
-        vetor_final2[i]['Frequencia relativa'] = a 
+        vetor_final2[i]['Frequencia relativa'] = a
         let b = vetor_final2[i].valor
         vetor_final2[i]['Frequencia acumulada'] = b
         let c = vetor_final2[i]['Frequencia relativa']
         vetor_final2[i]['Frequencia relativa acumulada'] = c
+        vetor_final2[i]['intervalo inferior frequencia acumulada'] = 0
     } else {
         let a = (vetor_final2[i].valor / total) * 100
         vetor_final2[i]['Frequencia relativa'] = a
@@ -352,63 +380,64 @@ function frequencias(i) {
         vetor_final2[i]['Frequencia acumulada'] = b;
         let c = (vetor_final2[i]['Frequencia relativa']) + (vetor_final2[aux]['Frequencia relativa acumulada'])
         vetor_final2[i]['Frequencia relativa acumulada'] = c
+        let d = vetor_final2[aux]['Frequencia acumulada']
+        vetor_final2[i]['intervalo inferior frequencia acumulada'] = d
     }
+
 }
 
-function grafico (vetor_final2, tipo_variavel,titulo){
+function grafico(vetor_final2, tipo_variavel, titulo) {
     let nome_dado = []
     let valor_dado = []
     let valor_porcentagem = []
     let cores_aleatorias = []
     let cores_aleatorias2 = []
-    for(let i = 0; i < vetor_final2.length; i++){
+    for (let i = 0; i < vetor_final2.length; i++) {
         nome_dado.push(vetor_final2[i]['nome'])
         valor_dado.push(vetor_final2[i]['valor'])
-        valor_porcentagem.push(vetor_final2[i]['Frequencia relativa'])
-        let  r = Math.floor(Math.random()*255)
-        let  g = Math.floor(Math.random()*255)
-        let  b = Math.floor(Math.random()*255)
+        valor_porcentagem.push(vetor_final2[i]['Frequencia relativa'].toFixed(2))
+        let r = Math.floor(Math.random() * 255)
+        let g = Math.floor(Math.random() * 255)
+        let b = Math.floor(Math.random() * 255)
         let cor = `rgba(${r},${g},${b},0.25)`
         let cor2 = `rgba(${r},${g},${b},1)`
         cores_aleatorias.push(cor)
-        cores_aleatorias2.push(cor2) 
-        console.log(nome_dado)
+        cores_aleatorias2.push(cor2)
 
+    }
     var ctx = document.getElementById('myChart');
-if(tipo_variavel == 1 || tipo_variavel == 2){
-    
-    
-    var myChart = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: nome_dado,
-            datasets: [{
-                label:valor_dado,
-                data: valor_porcentagem,
-                backgroundColor: cores_aleatorias,
-                borderColor:cores_aleatorias2,
-            }]
-        },
-        options: {
-            title: {
-                display: true,
-                text: titulo
+    if (tipo_variavel == 1 || tipo_variavel == 2) {
+
+        var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: nome_dado,
+                datasets: [{
+                    label: valor_dado,
+                    data: valor_porcentagem,
+                    backgroundColor: cores_aleatorias,
+                    borderColor: cores_aleatorias2,
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: titulo
+                }
             }
-        }
-    });
-}
-else if(tipo_variavel == 3){
-    
-var ctx = document.getElementById('myChart');
+        });
+    } else if (tipo_variavel == 3) {
+
+        var ctx = document.getElementById('myChart');
         var myChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: nome_dado,
                 datasets: [{
-                    label:titulo ,
+                    label: titulo,
                     data: valor_porcentagem,
                     backgroundColor: cores_aleatorias,
-                    borderColor:cores_aleatorias2,
+                    borderColor: cores_aleatorias2,
                     borderWidth: 1
                 }]
             },
@@ -423,6 +452,143 @@ var ctx = document.getElementById('myChart');
             }
         });
 
+    } else if (tipo_variavel == 4) {
+        let nome_continuo = []
+        for (let i = 0; i < vetor_final2.length; i++) {
+            nome_continuo.push(vetor_final2[i]['nome'])
+        }
+        var myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: nome_continuo,
+                datasets: [{
+                    label: titulo,
+                    data: valor_porcentagem,
+                    backgroundColor: cores_aleatorias,
+                    borderColor: cores_aleatorias2,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        barPercentage: 1.25,
+                    }, {
+                        display: false,
+                        ticks: {
+                            autoSkip: false,
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        })
+
+
+    }
+
+} // fim função
+
+function media(vetordados, tipo_variavel, total) {
+    let vetor_aux2 = vetordados.slice(0 ,vetordados.length)
+    let vetor_frequecias = []
+    let moda = []
+    let maior_frequencia
+    let vetor_frequecias_ordenado = []
+    let mediana = []
+    let stringmediana="" 
+    let stringmoda =""
+    if (tipo_variavel == 1 || tipo_variavel == 2) {
+    if(total % 2 == 0){
+        let possivel_mediana1 = total / 2
+        let possivel_mediana2 = possivel_mediana1 + 1
+        for(let i =0; i < vetordados.length; i++){
+            if( possivel_mediana1 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana1){
+                mediana.push(vetordados[i]['nome'])
+            }
+            else if(possivel_mediana2 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana2){
+                mediana.push(vetordados[i]['nome'])
+            } 
+        }
+       
+
+    }
+    else if (total % 2 != 0){
+        let possivel_mediana = Math.ceil(total/2)
+        console.log(possivel_mediana)
+        for(let i =0; i < vetordados.length; i++){
+            if((possivel_mediana <= vetordados[i]['Frequencia acumulada']) && (vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana)){
+                mediana.push(vetordados[i]['nome'])
+
+            }
+        }
+    }
+   
+        for (let i = 0; i < vetor_aux2.length; i++) {
+            vetor_frequecias.push(vetor_aux2[i]['valor'])
+        }
+        vetor_frequecias.sort(function (a, b) {
+            return a - b;
+        });
+        vetor_frequecias_ordenado = vetor_frequecias
+        maior_frequencia = vetor_frequecias_ordenado[vetor_frequecias_ordenado.length - 1]
+        let vezes_do_vetor = vetor_aux2.length
+
+        for (let a = 0; a < vezes_do_vetor; a++) {
+           
+            let indice_moda = buscaSequencial(vetor_aux2, maior_frequencia, (obj, valor) => obj['valor'] === valor)
+           
+            if (indice_moda >= 0) {
+                moda.push(vetor_aux2[indice_moda]['nome'])
+                vetor_aux2.splice(indice_moda, 1)
+                
+            } else if (indice_moda == -1) {
+
+               // break
+            }
+        }
+        
+        let tamanho_moda = moda.length
+        let tamanho_vetordados = vetordados.length
+        if (tamanho_moda == tamanho_vetordados){
+        stringmoda = "Não possui moda"
+
+        }
+        else{
+            if(moda.length == 1){
+                stringmoda = moda[0]
+            }
+            else if(moda.length > 1){
+            for(dado of moda){
+                stringmoda += dado + "/ "
+                
+            }
+        }
+         
+        }
+        for(dado of mediana){
+            stringmediana += dado + "/ "
+            
+        }
+        console.log(stringmediana)
+    }// tipo de variavel nominal e ordinal fim
+
+   if(tipo_variavel == 3){
+
+   }
 }
-}
-}
+
+function buscaSequencial(lista, valorBusca, fnComp){
+    for(let i = 0; i < lista.length; i++){
+        //Encontrou o que está buscando: retorna a posição
+        //em que foi encontrado
+        if(fnComp(lista[i], valorBusca)) return i
+    }
+    return -1// valorBusca não foi encontrado em lista
+    }
+    
