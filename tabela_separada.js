@@ -6,6 +6,7 @@ const resultado = document.getElementById("button")
 const tabela = document.getElementById("tabelasvariaveis")
 const tipo_variavel = document.getElementById("tipo de variavel")
 const ordem = document.getElementById("ordem_dados")
+const pontos_centrais = document.getElementById('tabela_medias')
 let vetor_final2 = []
 let total = 0
 let tira_espaco = /\s*;\s*/; // Tira os espaços entre os ";"
@@ -172,12 +173,12 @@ function botaoClique() {
             //calcula a amplitude do dados 
             let aux = vetor_final2.length - 1
             let amplitude_total = vetor_final2[aux]['nome'] - vetor_final2[0]['nome']
-            let k = (total) ** 1 / 2
+            let k = (total) ** (1 / 2)
 
             //possiveis numeros de linhas
             let nl1 = Math.floor(k)
-            let nl2 = nl1 - 1
-            let nl3 = nl1 + 1
+            let nl2 = nl1 + 1
+            let nl3 = nl1 - 1
             let x = true
             let aux3 = amplitude_total + 1
             let intervalo_de_classe
@@ -220,7 +221,7 @@ function botaoClique() {
                             let continua = {
                                 nome: string,
                                 valor: contador,
-                                'limete_inferior': ajuda_antiga,
+                                'limite_inferior': ajuda_antiga,
                                 'limite_superior': ajuda
                             }
                             aux2++
@@ -232,7 +233,7 @@ function botaoClique() {
                             let continua = {
                                 nome: string,
                                 valor: contador,
-                                'limete_inferior': ajuda_antiga,
+                                'limite_inferior': ajuda_antiga,
                                 'limite_superior': ajuda
                             }
                             aux2++
@@ -251,7 +252,7 @@ function botaoClique() {
                             let continua = {
                                 nome: string,
                                 valor: contador,
-                                'limete_inferior': ajuda_antiga,
+                                'limite_inferior': ajuda_antiga,
                                 'limite_superior': ajuda
                             }
                             vetor_continuo.push(continua)
@@ -263,7 +264,7 @@ function botaoClique() {
 
             }
             vetor_final2 = vetor_continuo
-           
+
         }
         //calculando as frequencias chamando uma função a parte 
         for (let i = 0; i < vetor_final2.length; i++) {
@@ -346,7 +347,9 @@ function botaoClique() {
         linha.appendChild(cel7)
 
         grafico(vetor_final2, tipo_variavel.selectedIndex, nome.value)
-        media(vetor_final2, tipo_variavel.selectedIndex, total)
+        tendencia_central(vetor_final2, tipo_variavel.selectedIndex, total)
+        const mostrar = document.getElementById('medida_separatriz')
+        mostrar.style.visibility= 'visible'//('visibility visible')
     }
 
 
@@ -494,101 +497,277 @@ function grafico(vetor_final2, tipo_variavel, titulo) {
 
 } // fim função
 
-function media(vetordados, tipo_variavel, total) {
-    let vetor_aux2 = vetordados.slice(0 ,vetordados.length)
+function tendencia_central(vetordados, tipo_variavel, total) {
+    let vetor_aux2 = vetordados.slice(0, vetordados.length)
+    let stringmediana = ""
+    let stringmoda = ""
+    let stringmedia = ""
+    if (tipo_variavel == 1 || tipo_variavel == 2) {
+
+        stringmediana = achando_mediana(vetordados, total, tipo_variavel)
+        stringmoda = achando_moda(vetordados, vetor_aux2,tipo_variavel)
+
+        stringmedia = "Não possui média"
+
+    } // tipo de variavel nominal e ordinal fim
+    else if (tipo_variavel == 3) {
+        //média 
+        let soma = 0
+        for (let i = 0; i < vetor_aux2.length; i++) {
+            soma += Number(vetor_aux2[i]['nome'] * vetor_aux2[i]['valor'])
+        }
+        stringmedia = soma / total
+        stringmediana = achando_mediana(vetordados, total, tipo_variavel)
+        stringmoda = achando_moda(vetordados, vetor_aux2,tipo_variavel)
+    } else if (tipo_variavel == 4) {
+        let soma = 0
+
+        for (let i = 0; i < vetor_aux2.length; i++) {
+            let media_simples = 0
+            media_simples = Number((vetor_aux2[i]['limite_inferior'] + vetor_aux2[i]['limite_superior']) / 2)
+            soma += Number(vetor_aux2[i]['valor'] * media_simples)
+
+        }
+        stringmedia = soma / total
+        stringmoda = achando_moda(vetordados, vetor_aux2,tipo_variavel)
+
+
+        let possiveis_medianas_continua = achando_mediana(vetordados, total, tipo_variavel)
+        
+            for(a =0 ; a < vetordados.length;a++){
+                let nome1 = vetordados[a]['nome']
+                if(possiveis_medianas_continua[0] == nome1){
+                      let somatoria = Math.ceil(total/2)
+                      let fant = vetordados[a-1]['Frequencia acumulada']
+                      let fimd = vetordados[a]["valor"]
+                      let h = vetordados[a]['limite_superior'] - vetordados[a]['limite_inferior']
+                      let i = vetordados[a]['limite_inferior']
+                      let fracao = (somatoria - fant)/fimd
+                      let md = (fracao*h)+i
+                      stringmediana = md
+                
+                }
+            }
+        
+    }
+    
+    // criando a tabela dos pontos mediais 
+    // cria o cabeçalho da tabela
+    let linha_nomes = document.createElement('tr')
+    pontos_centrais.appendChild(linha_nomes)
+    //média
+    let media = document.createElement('td')
+    media.id = 'media'
+    media.innerText = "Média"
+    linha_nomes.appendChild(media)
+    //Mediana
+    let mediana_tabela = document.createElement('td')
+    mediana_tabela.id = 'mediana_tabela'
+    mediana_tabela.innerText = "Mediana"
+    linha_nomes.appendChild(mediana_tabela)
+    //Moda
+    let moda_tabela = document.createElement('td')
+    moda_tabela.id = 'moda_tabela'
+    moda_tabela.innerText = "Moda"
+    linha_nomes.appendChild(moda_tabela)
+    //inserindo os valores 
+    //CRIAR LINHA NA TABELA
+    let linha = document.createElement('tr')
+    pontos_centrais.appendChild(linha)
+    //valor da média
+    let cel1 = document.createElement('td')
+    cel1.id = 'media_valor'
+    cel1.innerText = stringmedia
+    linha.appendChild(cel1)
+    //valor da mediana
+    let cel2 = document.createElement('td')
+    cel2.id = 'mediana_valor'
+    cel2.innerText = stringmediana
+    linha.appendChild(cel2)
+    //valor da moda
+    let cel3 = document.createElement('td')
+    cel3.id = 'moda_valor'
+    cel3.innerText = stringmoda
+    linha.appendChild(cel3)
+}
+
+function buscaSequencial(lista, valorBusca, fnComp) {
+    for (let i = 0; i < lista.length; i++) {
+        //Encontrou o que está buscando: retorna a posição
+        //em que foi encontrado
+        if (fnComp(lista[i], valorBusca)) return i
+    }
+    return -1 // valorBusca não foi encontrado em lista
+}
+
+// acha a mediana dos 3 primeiros casos
+function achando_mediana(vetordados, total, tipo_variavel) {
+    let mediana = []
+    let stringmediana = ""
+    if (total % 2 == 0) {
+        let possivel_mediana1 = total/2
+        let possivel_mediana2 = possivel_mediana1 + 1
+        for (let i = 0; i < vetordados.length; i++) {
+            if (possivel_mediana1 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana1) {
+                mediana.push(vetordados[i]['nome'])
+            } else if (possivel_mediana2 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana2) {
+                mediana.push(vetordados[i]['nome'])
+            }
+        }
+
+
+    } else if (total % 2 != 0) {
+        let possivel_mediana = Math.ceil(total / 2)
+        for (let i = 0; i < vetordados.length; i++) {
+            if ((possivel_mediana <= vetordados[i]['Frequencia acumulada']) && (vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana)) {
+                mediana.push(vetordados[i]['nome'])
+
+            }
+        }
+    }
+    if (tipo_variavel == 1 || tipo_variavel == 2 || tipo_variavel == 3) {
+        for (dado of mediana) {
+            stringmediana += dado + " "
+
+        }
+
+        return stringmediana
+    } else if (tipo_variavel == 4) {
+        return mediana
+    }
+}
+
+function achando_moda(vetordados, vetor_aux2,tipo_variavel) {
     let vetor_frequecias = []
     let moda = []
     let maior_frequencia
     let vetor_frequecias_ordenado = []
-    let mediana = []
-    let stringmediana="" 
-    let stringmoda =""
-    if (tipo_variavel == 1 || tipo_variavel == 2) {
-    if(total % 2 == 0){
-        let possivel_mediana1 = total / 2
-        let possivel_mediana2 = possivel_mediana1 + 1
-        for(let i =0; i < vetordados.length; i++){
-            if( possivel_mediana1 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana1){
-                mediana.push(vetordados[i]['nome'])
-            }
-            else if(possivel_mediana2 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana2){
-                mediana.push(vetordados[i]['nome'])
-            } 
-        }
-       
-
+    let stringmoda = ""
+    for (let i = 0; i < vetor_aux2.length; i++) {
+        vetor_frequecias.push(vetor_aux2[i]['valor'])
     }
-    else if (total % 2 != 0){
-        let possivel_mediana = Math.ceil(total/2)
-        console.log(possivel_mediana)
-        for(let i =0; i < vetordados.length; i++){
-            if((possivel_mediana <= vetordados[i]['Frequencia acumulada']) && (vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana)){
-                mediana.push(vetordados[i]['nome'])
+    vetor_frequecias.sort(function (a, b) {
+        return a - b;
+    });
+    vetor_frequecias_ordenado = vetor_frequecias
+    maior_frequencia = vetor_frequecias_ordenado[vetor_frequecias_ordenado.length - 1]
+    let vezes_do_vetor = vetor_aux2.length
 
-            }
+    for (let a = 0; a < vezes_do_vetor; a++) {
+
+        let indice_moda = buscaSequencial(vetor_aux2, maior_frequencia, (obj, valor) => obj['valor'] === valor)
+
+        if (indice_moda >= 0) {
+            moda.push(vetor_aux2[indice_moda]['nome'])
+            vetor_aux2.splice(indice_moda, 1)
+
+        } else if (indice_moda == -1) {
+
+            // break
         }
     }
-   
-        for (let i = 0; i < vetor_aux2.length; i++) {
-            vetor_frequecias.push(vetor_aux2[i]['valor'])
-        }
-        vetor_frequecias.sort(function (a, b) {
-            return a - b;
-        });
-        vetor_frequecias_ordenado = vetor_frequecias
-        maior_frequencia = vetor_frequecias_ordenado[vetor_frequecias_ordenado.length - 1]
-        let vezes_do_vetor = vetor_aux2.length
 
-        for (let a = 0; a < vezes_do_vetor; a++) {
-           
-            let indice_moda = buscaSequencial(vetor_aux2, maior_frequencia, (obj, valor) => obj['valor'] === valor)
-           
-            if (indice_moda >= 0) {
-                moda.push(vetor_aux2[indice_moda]['nome'])
-                vetor_aux2.splice(indice_moda, 1)
-                
-            } else if (indice_moda == -1) {
-
-               // break
-            }
-        }
-        
-        let tamanho_moda = moda.length
-        let tamanho_vetordados = vetordados.length
-        if (tamanho_moda == tamanho_vetordados){
+    let tamanho_moda = moda.length
+    let tamanho_vetordados = vetordados.length
+    if (tamanho_moda == tamanho_vetordados) {
         stringmoda = "Não possui moda"
 
-        }
-        else{
-            if(moda.length == 1){
-                stringmoda = moda[0]
-            }
-            else if(moda.length > 1){
-            for(dado of moda){
-                stringmoda += dado + "/ "
-                
+    } 
+   else if(tipo_variavel == 4){
+    
+        for(i = 0; i < vetordados.length; i++){
+            if(moda[0] == vetordados[i]['nome']){
+                stringmoda = Number((vetordados[i]['limite_inferior']+ vetordados[i]['limite_superior'])/2)
             }
         }
-         
-        }
-        for(dado of mediana){
-            stringmediana += dado + "/ "
             
+    }
+       
+    else {
+        if (moda.length == 1) {
+            stringmoda = moda[0]
+        } else if (moda.length > 1) {
+            for (dado of moda) {
+                stringmoda += dado + "/ "
+
+            }
         }
-        console.log(stringmediana)
-    }// tipo de variavel nominal e ordinal fim
 
-   if(tipo_variavel == 3){
-
-   }
+    }
+   
+    return stringmoda
+}
+const medias_moveis = document.getElementById('medias_moveis')
+const medias_moveis_valores = document.getElementById('medias_moveis_valores')
+medias_moveis.addEventListener('click', criando_valores)
+function criando_valores(){   
+    for (i = 0; i < medias_moveis_valores.length; i = i ++) {
+        medias_moveis_valores.remove(0);
+    } 
+    let tipo_media = medias_moveis.value
+    let intervalo
+if(tipo_media == 'Quartil'){
+    intervalo = 25
+}else if(tipo_media == 'Quintil'){
+    intervalo = 20
+}else if(tipo_media == 'Decil'){
+    intervalo = 10
+}else if(tipo_media == 'Porcentil'){
+    intervalo = 1
 }
 
-function buscaSequencial(lista, valorBusca, fnComp){
-    for(let i = 0; i < lista.length; i++){
-        //Encontrou o que está buscando: retorna a posição
-        //em que foi encontrado
-        if(fnComp(lista[i], valorBusca)) return i
+for(let i =intervalo; i <=100; i+=intervalo){
+    let valor = document.createElement('option')
+    valor.innerHTML = i
+    medias_moveis_valores.appendChild(valor)
+    medias_moveis_valores.addEventListener('click', calcula)
+}
+
+function calcula(){
+let porcentagem = medias_moveis_valores.value
+let resultado = mediana_movel(vetor_final2,total,tipo_variavel.selectedIndex,porcentagem)
+
+const exibir = document.getElementById('media_movel_resultado')
+exibir.innerHTML = resultado
+function mediana_movel(vetordados, total, tipo_variavel, porcentagem) {
+    let mediana = []
+    let stringmediana = ""
+   let porcentagem_decimal = porcentagem/100 
+        let possivel_mediana1 = total*porcentagem_decimal
+        for (let i = 0; i < vetordados.length; i++) {
+            if (possivel_mediana1 <= vetordados[i]['Frequencia acumulada'] && vetordados[i]['intervalo inferior frequencia acumulada'] < possivel_mediana1) {
+                mediana.push(vetordados[i]['nome'])
+                
+            } 
+        }
+    if (tipo_variavel == 1 || tipo_variavel == 2 || tipo_variavel == 3) {
+        
+            stringmediana = mediana[0]
+
+        return stringmediana
+    } else if (tipo_variavel == 4) {
+        let fac
+        for(a =0 ; a < vetor_final2.length;a++){
+            let nome1 = vetor_final2[a]['nome']
+            if(mediana[0] == nome1){
+                if(a==0){
+                     fac = 0
+                }
+                else {
+                     fac = vetor_final2[a-1]['Frequencia acumulada']
+                }
+                 let posicao = possivel_mediana1
+                  let h = vetor_final2[a]['limite_superior'] - vetor_final2[a]['limite_inferior']
+                  let i = vetor_final2[a]['limite_inferior']
+                  let fi = vetor_final2[a]['valor']
+                  let fracao = (posicao - fac)/fi
+                  let md = (h*fracao) + i
+                  stringmediana = md
+            
+            }
+        }
+        return stringmediana
     }
-    return -1// valorBusca não foi encontrado em lista
-    }
-    
+}
+}
+}

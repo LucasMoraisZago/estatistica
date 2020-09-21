@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estatística Descritiva</title>
     <style>
+        div#medida_separatriz{
+            visibility:hidden       
+             }
         h1 {
             text-align: center;
         }
@@ -81,10 +84,26 @@
             </div>        
         </form>
     </div>
+<div id="medida_separatriz"> 
+    <select id="medias_moveis">
+        <option>Selecione a medida separatris</option>
+        <option onmouseclick = "criando_valores" >Quartil</option>
+        <option onmouseclick = "criando_valores">Quintil</option>
+        <option onmouseclick = "criando_valores">Decil</option>
+        <option onmouseclick = "criando_valores">Porcentil</option>
+    </select>
+    <select id="medias_moveis_valores">
+    </select>
+<p id="media_movel_resultado"></p>
+</div>
+
+    <table id="tabela_medias">      
+        
+                    
+    </table>
     
         <table id="tabelasvariaveis">      
-            <tr></tr>
-                        
+             
         </table>
         <canvas id="myChart" style="background-color: white"></canvas>
     <script src="tabela_separada.js"></script>
